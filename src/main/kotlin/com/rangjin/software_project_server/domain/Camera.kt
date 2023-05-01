@@ -21,20 +21,19 @@ class Camera (
 
     @Embeddable
     data class Table(
-        var tabX: Int,
-        var tabY: Int,
-        var tabHeight: Int,
-        var tabWidth: Int,
+        var tabX1: Int,
+        var tabY1: Int,
+        var tabX2: Int,
+        var tabY2: Int,
     )
 
     @Embeddable
     data class Client(
-        var cltX: Int,
-        var cltY: Int,
-        var cltHeight: Int,
-        var cltWidth: Int,
-        var sit: Boolean,
-        var sitTable: Int,
+        var cltX1: Int,
+        var cltY1: Int,
+        var cltX2: Int,
+        var cltY2: Int,
+        var sitTable: Int = -1,
     )
 
     fun updateTables(tables: List<Table>) {

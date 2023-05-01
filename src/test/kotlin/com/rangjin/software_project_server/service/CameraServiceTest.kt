@@ -37,6 +37,29 @@ class CameraServiceTest @Autowired constructor(
     }
 
     @Test
+    @Transactional
+    fun getCameraTest() {
+        // given
+        val camera = Camera()
+        camera.tables = listOf(
+            Camera.Table(1, 1, 2, 2),
+            Camera.Table(3, 3, 4, 4),
+        )
+        camera.clients = listOf(
+            Camera.Client(1, 1, 2, 2, -1),
+            Camera.Client(4, 4, 5, 5, -1),
+            Camera.Client(5, 5, 6, 6, -1),
+        )
+        val id = cameraRepository.save(camera).id
+
+        println(cameraService.getCamera(id!!))
+
+        // when
+
+        // then
+    }
+
+    @Test
     @DisplayName("테이블을 업데이트한다")
     @Transactional
     fun updateTableTest() {
@@ -71,9 +94,9 @@ class CameraServiceTest @Autowired constructor(
         val id = cameraRepository.save(camera).id
 
         val request = ClientsUpdateRequest(id!!, listOf(
-            Camera.Client(1, 1, 1, 1, true, -1),
-            Camera.Client(4, 4, 1, 1, true, -1),
-            Camera.Client(5, 5, 1, 1, false, -1),
+            Camera.Client(1, 1, 2, 2, -1),
+            Camera.Client(4, 4, 5, 5, -1),
+            Camera.Client(5, 5, 6, 6, -1),
         ))
 
         // when
@@ -82,9 +105,9 @@ class CameraServiceTest @Autowired constructor(
         // then
         val results = cameraRepository.findAll()
         assertThat(results[0].clients).hasSize(3)
-        assertThat(results[0].clients[0]).isEqualTo(Camera.Client(1, 1, 1, 1, true, 0))
-        assertThat(results[0].clients[1]).isEqualTo(Camera.Client(4, 4, 1, 1, true, 1))
-        assertThat(results[0].clients[2]).isEqualTo(Camera.Client(5, 5, 1, 1, false, -1))
+        assertThat(results[0].clients[0]).isEqualTo(Camera.Client(1, 1, 2, 2, 0))
+        assertThat(results[0].clients[1]).isEqualTo(Camera.Client(4, 4, 5, 5, 1))
+        assertThat(results[0].clients[2]).isEqualTo(Camera.Client(5, 5, 6, 6, 1))
     }
 
 }
