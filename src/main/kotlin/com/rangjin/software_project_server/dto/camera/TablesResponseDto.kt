@@ -2,7 +2,7 @@ package com.rangjin.software_project_server.dto.camera
 
 import com.rangjin.software_project_server.domain.Camera
 
-data class TableResponseDto(
+data class TablesResponseDto(
     var tabX1: Int?,
     var tabY1: Int?,
     var tabX2: Int?,

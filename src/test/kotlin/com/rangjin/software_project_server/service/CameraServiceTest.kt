@@ -1,8 +1,10 @@
 package com.rangjin.software_project_server.service
 
 import com.rangjin.software_project_server.domain.Camera
-import com.rangjin.software_project_server.dto.camera.ClientsUpdateRequest
-import com.rangjin.software_project_server.dto.camera.TablesUpdateRequest
+import com.rangjin.software_project_server.dto.camera.ClientsRequestDto
+import com.rangjin.software_project_server.dto.camera.ClientsResponseDto
+import com.rangjin.software_project_server.dto.camera.TablesRequestDto
+import com.rangjin.software_project_server.dto.camera.TablesResponseDto
 import com.rangjin.software_project_server.repository.CameraRepository
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -37,6 +39,7 @@ class CameraServiceTest @Autowired constructor(
     }
 
     @Test
+    @DisplayName("카메라 정보를 가져온다")
     @Transactional
     fun getCameraTest() {
         // given
@@ -46,17 +49,25 @@ class CameraServiceTest @Autowired constructor(
             Camera.Table(3, 3, 4, 4),
         )
         camera.clients = listOf(
-            Camera.Client(1, 1, 2, 2, -1),
-            Camera.Client(4, 4, 5, 5, -1),
-            Camera.Client(5, 5, 6, 6, -1),
+            Camera.Client(1, 1, 2, 2, 0),
+            Camera.Client(4, 4, 5, 5, 1),
+            Camera.Client(5, 5, 6, 6, 1),
         )
         val id = cameraRepository.save(camera).id
 
-        println(cameraService.getCamera(id!!))
-
         // when
+        val results = cameraService.getCamera(id!!)
 
         // then
+        assertThat(results).isNotNull
+        assertThat(results!!.tables).hasSize(2)
+        assertThat(results.tables[0]).isEqualTo(TablesResponseDto(1, 1, 2, 2))
+        assertThat(results.tables[1]).isEqualTo(TablesResponseDto(3, 3, 4, 4))
+
+        assertThat(results.clients).hasSize(3)
+        assertThat(results.clients[0]).isEqualTo(ClientsResponseDto(1, 1, 2, 2, 0))
+        assertThat(results.clients[1]).isEqualTo(ClientsResponseDto(4, 4, 5, 5, 1))
+        assertThat(results.clients[2]).isEqualTo(ClientsResponseDto(5, 5, 6, 6, 1))
     }
 
     @Test
@@ -65,14 +76,13 @@ class CameraServiceTest @Autowired constructor(
     fun updateTableTest() {
         // given
         val id = cameraRepository.save(Camera()).id
-        val request = TablesUpdateRequest(id!!,
-            listOf(
+        val request = TablesRequestDto(listOf(
                 Camera.Table(1, 1, 2, 2),
                 Camera.Table(3, 3, 4, 4),
         ))
 
         // when
-        cameraService.saveTables(request)
+        cameraService.updateTables(id!!, request)
 
         // then
         val results = cameraRepository.findAll()
@@ -93,14 +103,14 @@ class CameraServiceTest @Autowired constructor(
         )
         val id = cameraRepository.save(camera).id
 
-        val request = ClientsUpdateRequest(id!!, listOf(
+        val request = ClientsRequestDto(listOf(
             Camera.Client(1, 1, 2, 2, -1),
             Camera.Client(4, 4, 5, 5, -1),
             Camera.Client(5, 5, 6, 6, -1),
         ))
 
         // when
-        cameraService.saveClients(request)
+        cameraService.updateClients(id!!, request)
 
         // then
         val results = cameraRepository.findAll()

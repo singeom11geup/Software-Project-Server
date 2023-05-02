@@ -1,15 +1,14 @@
 package com.rangjin.software_project_server.service
 
 import com.rangjin.software_project_server.domain.Camera
+import com.rangjin.software_project_server.dto.camera.CameraRequestDto
 import com.rangjin.software_project_server.dto.camera.CameraResponseDto
-import com.rangjin.software_project_server.dto.camera.ClientResponseDto
-import com.rangjin.software_project_server.dto.camera.ClientsUpdateRequest
-import com.rangjin.software_project_server.dto.camera.TablesUpdateRequest
+import com.rangjin.software_project_server.dto.camera.ClientsRequestDto
+import com.rangjin.software_project_server.dto.camera.TablesRequestDto
 import com.rangjin.software_project_server.repository.CameraRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 import kotlin.math.*
 
 @Service
@@ -24,18 +23,21 @@ class CameraService(
 
     @Transactional
     fun getCamera(id: Long): CameraResponseDto? {
+        // TODO: null 일 때 error 처리
         return cameraRepository.findByIdOrNull(id)?.let { CameraResponseDto(it) }
     }
 
     @Transactional
-    fun saveTables(request: TablesUpdateRequest) {
-        val camera = cameraRepository.findByIdOrNull(request.id)
+    fun updateTables(id: Long, request: TablesRequestDto) {
+        // TODO: null 일 때 error 처리
+        val camera = cameraRepository.findByIdOrNull(id)
         camera?.updateTables(request.tables)
     }
 
     @Transactional
-    fun saveClients(request: ClientsUpdateRequest) {
-        val camera = cameraRepository.findByIdOrNull(request.id)
+    fun updateClients(id: Long, request: ClientsRequestDto) {
+        // TODO: null 일 때 error 처리
+        val camera = cameraRepository.findByIdOrNull(id)
         val tables = camera?.tables
         val clients = request.clients
         for (client in clients) {
@@ -53,6 +55,12 @@ class CameraService(
             client.sitTable = num
         }
         camera?.updateClients(clients)
+    }
+
+    @Transactional
+    fun updateCamera(id: Long, request: CameraRequestDto) {
+        updateTables(id, request.tables)
+        updateClients(id, request.clients)
     }
 
 }
