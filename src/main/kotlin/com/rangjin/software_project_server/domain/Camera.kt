@@ -8,6 +8,7 @@ class Camera (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
+    @Column(columnDefinition="TEXT", length = 4096)
     var image: String,
 
     @ElementCollection
