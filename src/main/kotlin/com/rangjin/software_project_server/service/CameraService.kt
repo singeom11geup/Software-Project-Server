@@ -1,5 +1,6 @@
 package com.rangjin.software_project_server.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rangjin.software_project_server.domain.Camera
 import com.rangjin.software_project_server.dto.camera.*
 import com.rangjin.software_project_server.repository.CameraRepository
@@ -49,7 +50,10 @@ class CameraService(
         val requestMessage: HttpEntity<*> = HttpEntity(body, httpHeaders)
         val response: HttpEntity<String> = restTemplate.postForEntity<String>("http://127.0.0.1:5000/analyze", requestMessage, String::class.java)
 
-        print(response)
+        print(response.body)
+
+        val objectMapper = ObjectMapper()
+        updateClients(id, objectMapper.readValue(response.body, ClientsRequestDto::class.java))
     }
 
     @Transactional
