@@ -1,15 +1,18 @@
 package com.rangjin.software_project_server.service
 
 import com.rangjin.software_project_server.domain.Camera
-import com.rangjin.software_project_server.dto.camera.CameraRequestDto
-import com.rangjin.software_project_server.dto.camera.CameraResponseDto
-import com.rangjin.software_project_server.dto.camera.ClientsRequestDto
-import com.rangjin.software_project_server.dto.camera.TablesRequestDto
+import com.rangjin.software_project_server.dto.camera.*
 import com.rangjin.software_project_server.repository.CameraRepository
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpEntity
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import kotlin.math.*
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
+import org.springframework.web.client.RestTemplate
+import kotlin.math.pow
+
 
 @Service
 class CameraService(
@@ -25,6 +28,28 @@ class CameraService(
     fun getCamera(id: Long): CameraResponseDto? {
         // TODO: null 일 때 error 처리
         return cameraRepository.findByIdOrNull(id)?.let { CameraResponseDto(it) }
+    }
+
+    @Transactional
+    fun getImage(id: Long): String? {
+        return cameraRepository.findByIdOrNull(id)?.image
+    }
+
+    @Transactional
+    fun updateImage(id: Long, request: ImageRequestDto) {
+        val camera = cameraRepository.findByIdOrNull(id)
+        camera?.updateImage(request.image)
+
+        val restTemplate = RestTemplate()
+        val httpHeaders = org.springframework.http.HttpHeaders()
+        httpHeaders.contentType = MediaType.APPLICATION_JSON
+
+        val body: MultiValueMap<String, String> = LinkedMultiValueMap()
+        body.add("image", request.image)
+        val requestMessage: HttpEntity<*> = HttpEntity(body, httpHeaders)
+        val response: HttpEntity<String> = restTemplate.postForEntity<String>("http://127.0.0.1:5000/analyze", requestMessage, String::class.java)
+
+        print(response)
     }
 
     @Transactional
