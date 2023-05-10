@@ -4,10 +4,13 @@ import com.rangjin.software_project_server.domain.Camera
 import com.rangjin.software_project_server.dto.camera.*
 import com.rangjin.software_project_server.repository.CameraRepository
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpEntity
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
+import org.springframework.web.client.RestTemplate
 import kotlin.math.pow
 
 
@@ -37,29 +40,16 @@ class CameraService(
         val camera = cameraRepository.findByIdOrNull(id)
         camera?.updateImage(request.image)
 
-        val builder = ProcessBuilder("./lib/venv/Scripts/python", "./lib/main.py", "--id", id.toString())
-        val process = builder.start()
+        val restTemplate = RestTemplate()
+        val httpHeaders = org.springframework.http.HttpHeaders()
+        httpHeaders.contentType = MediaType.APPLICATION_JSON
 
-        val reader = BufferedReader(InputStreamReader(process.inputStream))
-        val readerError = BufferedReader(InputStreamReader(process.errorStream))
+        val body: MultiValueMap<String, String> = LinkedMultiValueMap()
+        body.add("image", request.image)
+        val requestMessage: HttpEntity<*> = HttpEntity(body, httpHeaders)
+        val response: HttpEntity<String> = restTemplate.postForEntity<String>("http://127.0.0.1:5000/analyze", requestMessage, String::class.java)
 
-        var line: String?
-        while(true) {
-            line = reader.readLine()
-            if (line == null) {
-                break
-            } else {
-                println(line)
-            }
-        }
-        while(true) {
-            line = readerError.readLine()
-            if (line == null) {
-                break
-            } else {
-                println(line)
-            }
-        }
+        print(response)
     }
 
     @Transactional
