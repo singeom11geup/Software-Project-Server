@@ -8,6 +8,9 @@ class Camera (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
+    @Column(columnDefinition="TEXT", length = 4096)
+    var image: String,
+
     @ElementCollection
     @CollectionTable(name = "camera_tables")
     var tables: List<Table>,
@@ -17,7 +20,7 @@ class Camera (
     var clients: List<Client>,
 ){
 
-    constructor(): this(null, emptyList(), emptyList())
+    constructor(): this(null, null.toString(), emptyList(), emptyList())
 
     @Embeddable
     data class Table(
@@ -25,7 +28,9 @@ class Camera (
         var tabY1: Int,
         var tabX2: Int,
         var tabY2: Int,
-    )
+    ) {
+        constructor() : this(0, 0, 0, 0)
+    }
 
     @Embeddable
     data class Client(
@@ -34,7 +39,9 @@ class Camera (
         var cltX2: Int,
         var cltY2: Int,
         var sitTable: Int = -1,
-    )
+    ) {
+        constructor() : this(0, 0, 0, 0, -1)
+    }
 
     fun updateTables(tables: List<Table>) {
         this.tables = tables
@@ -42,6 +49,10 @@ class Camera (
 
     fun updateClients(client: List<Client>) {
         this.clients = client
+    }
+
+    fun updateImage(image: String) {
+        this.image = image
     }
 
 }

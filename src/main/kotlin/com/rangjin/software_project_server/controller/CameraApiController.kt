@@ -1,14 +1,10 @@
 package com.rangjin.software_project_server.controller
 
 import com.rangjin.software_project_server.dto.camera.CameraRequestDto
+import com.rangjin.software_project_server.dto.camera.ImageRequestDto
 import com.rangjin.software_project_server.service.CameraService
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/camera")
@@ -19,6 +15,16 @@ class CameraApiController(
     @GetMapping("/create")
     fun createCamera(): ResponseEntity<Any> {
         return ResponseEntity.ok().body(cameraService.createCamera())
+    }
+
+    @GetMapping("/image/{id}")
+    fun getImage(@PathVariable id: Long): ResponseEntity<Any> {
+        return ResponseEntity.ok().body(cameraService.getImage(id))
+    }
+
+    @PostMapping("/image/update/{id}")
+    fun image(@PathVariable id: Long, @RequestBody request: ImageRequestDto): ResponseEntity<Any> {
+        return ResponseEntity.ok().body(cameraService.updateImage(id, request))
     }
 
     @GetMapping("/read/{id}")
