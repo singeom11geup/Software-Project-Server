@@ -1,12 +1,20 @@
 package com.rangjin.software_project_server.domain
 
+import com.rangjin.software_project_server.dto.camera.LoginRequestDto
 import jakarta.persistence.*
+import org.jetbrains.annotations.NotNull
 
 @Entity
 class Camera (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
+
+    @NotNull
+    val username: String,
+
+    @NotNull
+    val password: String,
 
     @Column(columnDefinition="TEXT", length = 4096)
     var image: String,
@@ -20,7 +28,8 @@ class Camera (
     var clients: List<Client>,
 ){
 
-    constructor(): this(null, null.toString(), emptyList(), emptyList())
+    constructor(): this(null, "", "", "", emptyList(), emptyList())
+    constructor(requestDto: LoginRequestDto) : this(null, requestDto.username, requestDto.password, "", emptyList(), emptyList())
 
     @Embeddable
     data class Table(
