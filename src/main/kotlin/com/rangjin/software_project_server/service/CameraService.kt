@@ -3,6 +3,8 @@ package com.rangjin.software_project_server.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rangjin.software_project_server.domain.Camera
 import com.rangjin.software_project_server.dto.camera.*
+import com.rangjin.software_project_server.exception.BaseException
+import com.rangjin.software_project_server.exception.BaseResponseCode
 import com.rangjin.software_project_server.repository.CameraRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpEntity
@@ -21,19 +23,35 @@ class CameraService(
 ) {
 
     @Transactional
-    fun createCamera(): Long? {
-        return cameraRepository.save(Camera()).id
+    fun loginCamera(requestDto: LoginRequestDto): Long? {
+        return if (cameraRepository.existsByUsername(requestDto.username)) {
+            signIn(requestDto)
+        } else {
+            signUp(requestDto)
+        }
+    }
+
+    @Transactional
+    fun signIn(requestDto: LoginRequestDto): Long {
+        val camera = cameraRepository.findByUsername(requestDto.username)
+        if (camera.password == requestDto.password) {
+            return camera.id!!
+        } else {
+            throw BaseException(BaseResponseCode.INVALID_PASSWORD)
+        }
+    }
+
+    @Transactional
+    fun signUp(requestDto: LoginRequestDto): Long {
+        val camera = Camera(requestDto)
+        println(camera)
+        return cameraRepository.save(camera).id!!
     }
 
     @Transactional
     fun getCamera(id: Long): CameraResponseDto? {
         // TODO: null 일 때 error 처리
         return cameraRepository.findByIdOrNull(id)?.let { CameraResponseDto(it) }
-    }
-
-    @Transactional
-    fun getImage(id: Long): String? {
-        return cameraRepository.findByIdOrNull(id)?.image
     }
 
     @Transactional
@@ -48,12 +66,18 @@ class CameraService(
         val body: MultiValueMap<String, String> = LinkedMultiValueMap()
         body.add("image", request.image)
         val requestMessage: HttpEntity<*> = HttpEntity(body, httpHeaders)
-        val response: HttpEntity<String> = restTemplate.postForEntity<String>("http://127.0.0.1:5000/analyze", requestMessage, String::class.java)
 
-        print(response.body)
+        if (request.state == 1) {
+            val response: HttpEntity<String> = restTemplate.postForEntity<String>("http://127.0.0.1:5000/client", requestMessage, String::class.java)
 
-        val objectMapper = ObjectMapper()
-        updateClients(id, objectMapper.readValue(response.body, ClientsRequestDto::class.java))
+            val objectMapper = ObjectMapper()
+            updateClients(id, objectMapper.readValue(response.body, ClientsRequestDto::class.java))
+        } else {
+            val response: HttpEntity<String> = restTemplate.postForEntity<String>("http://127.0.0.1:5000/table", requestMessage, String::class.java)
+
+            val objectMapper = ObjectMapper()
+            updateTables(id, objectMapper.readValue(response.body, TablesRequestDto::class.java))
+        }
     }
 
     @Transactional
@@ -84,12 +108,6 @@ class CameraService(
             client.sitTable = num
         }
         camera?.updateClients(clients)
-    }
-
-    @Transactional
-    fun updateCamera(id: Long, request: CameraRequestDto) {
-        updateTables(id, request.tables)
-        updateClients(id, request.clients)
     }
 
 }
