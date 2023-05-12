@@ -6,6 +6,9 @@ import com.rangjin.software_project_server.dto.camera.*
 import com.rangjin.software_project_server.exception.BaseException
 import com.rangjin.software_project_server.exception.BaseResponseCode
 import com.rangjin.software_project_server.repository.CameraRepository
+import org.springframework.context.annotation.PropertySource
+import org.springframework.core.env.Environment
+import org.springframework.core.env.get
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpEntity
 import org.springframework.http.MediaType
@@ -18,8 +21,10 @@ import kotlin.math.pow
 
 
 @Service
+@PropertySource("application.properties")
 class CameraService(
     private val cameraRepository: CameraRepository,
+    private val environment: Environment,
 ) {
 
     @Transactional
@@ -68,12 +73,14 @@ class CameraService(
         val requestMessage: HttpEntity<*> = HttpEntity(body, httpHeaders)
 
         if (request.state == 1) {
-            val response: HttpEntity<String> = restTemplate.postForEntity<String>("http://127.0.0.1:5000/client", requestMessage, String::class.java)
+            val response: HttpEntity<String> = restTemplate.postForEntity<String>(
+                environment.getProperty("ml.url") + "/client", requestMessage, String::class.java)
 
             val objectMapper = ObjectMapper()
             updateClients(id, objectMapper.readValue(response.body, ClientsRequestDto::class.java))
         } else {
-            val response: HttpEntity<String> = restTemplate.postForEntity<String>("http://127.0.0.1:5000/table", requestMessage, String::class.java)
+            val response: HttpEntity<String> = restTemplate.postForEntity<String>(
+                environment.getProperty("ml.url") + "/table", requestMessage, String::class.java)
 
             val objectMapper = ObjectMapper()
             updateTables(id, objectMapper.readValue(response.body, TablesRequestDto::class.java))
