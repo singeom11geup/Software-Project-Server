@@ -20,8 +20,8 @@ import org.springframework.web.client.RestTemplate
 import kotlin.math.pow
 
 
-@Service
 @PropertySource("application.properties")
+@Service
 class CameraService(
     private val cameraRepository: CameraRepository,
     private val environment: Environment,
@@ -29,7 +29,7 @@ class CameraService(
 
     @Transactional
     fun loginCamera(requestDto: LoginRequestDto): Long? {
-        return if (cameraRepository.existsByUsername(requestDto.username)) {
+        return if (cameraRepository.existsByName(requestDto.name)) {
             signIn(requestDto)
         } else {
             signUp(requestDto)
@@ -38,7 +38,7 @@ class CameraService(
 
     @Transactional
     fun signIn(requestDto: LoginRequestDto): Long {
-        val camera = cameraRepository.findByUsername(requestDto.username)
+        val camera = cameraRepository.findByName(requestDto.name)
         if (camera.password == requestDto.password) {
             return camera.id!!
         } else {
@@ -49,7 +49,7 @@ class CameraService(
     @Transactional
     fun signUp(requestDto: LoginRequestDto): Long {
         val camera = Camera(requestDto)
-        println(camera)
+        println(requestDto.name  + " " + requestDto.password)
         return cameraRepository.save(camera).id!!
     }
 
