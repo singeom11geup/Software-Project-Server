@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface CameraRepository: JpaRepository<Camera, Long> {
 
-    fun existsByUsername(username: String): Boolean
-    fun findByUsername(username: String): Camera
+    fun existsByName(username: String): Boolean
+    fun findByName(username: String): Camera
 
 }

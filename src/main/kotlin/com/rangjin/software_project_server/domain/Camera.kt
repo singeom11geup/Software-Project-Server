@@ -5,18 +5,22 @@ import jakarta.persistence.*
 import org.jetbrains.annotations.NotNull
 
 @Entity
+@Table(name = "camera")
 class Camera (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     val id: Long? = null,
 
     @NotNull
-    val username: String,
+    @Column(name = "name")
+    val name: String,
 
     @NotNull
+    @Column(name = "password")
     val password: String,
 
-    @Column(columnDefinition="TEXT", length = 4096)
+    @Column(name = "image", columnDefinition = "LONGBLOB", length = 4096)
     var image: String,
 
     @ElementCollection
@@ -29,7 +33,7 @@ class Camera (
 ){
 
     constructor(): this(null, "", "", "", emptyList(), emptyList())
-    constructor(requestDto: LoginRequestDto) : this(null, requestDto.username, requestDto.password, "", emptyList(), emptyList())
+    constructor(requestDto: LoginRequestDto) : this(null, requestDto.name, requestDto.password, "", emptyList(), emptyList())
 
     @Embeddable
     data class Table(
