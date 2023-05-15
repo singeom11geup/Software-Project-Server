@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  flask:
+    build: 
+      context: ./Machine-Learning
+      dockerfile: ./Dockerfile
+    container_name: machine-learning
+    restart: always
+    environment:
+        - APP_NAME=flask
+    networks:
+      - server_network
+
+  database:
+    container_name: mysql_db
+    image: mysql
+    restart: always
+    environment: 
+      MYSQL_ROOT_PASSWORD: rangjin0342
+      TZ: 'Asia/Seoul'
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql/conf.d:/etc/mysql/conf.d # MySQL 설정 파일 위치
+    command:
+      - "mysqld"
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
+    networks:
+      - server_network
+
+  application:
+    container_name: spring_server
+    restart: always
+    build:
+      context: ./Software-Project-Server
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      SPRING_JPA_HIBERNATE_DDL-AUTO: update
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/camera?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rangjin0342
+    depends_on:
+      - database
+    networks:
+      - server_network
+
+networks:
+  server_network:
