@@ -60,6 +60,15 @@ class CameraService(
     }
 
     @Transactional
+    fun getAllCamera(): MutableList<SimpleCameraResponseDto> {
+        val list: MutableList<SimpleCameraResponseDto> = mutableListOf<SimpleCameraResponseDto>()
+        cameraRepository.findAll().forEach {
+            camera -> list.add(SimpleCameraResponseDto(camera))
+        }
+        return list
+    }
+
+    @Transactional
     fun updateImage(id: Long, request: ImageRequestDto) {
         val camera = cameraRepository.findByIdOrNull(id)
         camera?.updateImage(request.image)
