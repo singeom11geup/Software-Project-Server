@@ -27,4 +27,10 @@ class CameraApiController(
         return ResponseEntity.ok().body(cameraService.getCamera(id))
     }
 
+    @GetMapping("/read/all")
+    fun getAllCamera(): ResponseEntity<Any> {
+        print(cameraService.getAllCamera())
+        return ResponseEntity.ok().body(cameraService.getAllCamera())
+    }
+
 }
