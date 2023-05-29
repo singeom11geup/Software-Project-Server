@@ -49,19 +49,17 @@ class CameraService(
     @Transactional
     fun signUp(requestDto: LoginRequestDto): Long {
         val camera = Camera(requestDto)
-        println(requestDto.name  + " " + requestDto.password)
         return cameraRepository.save(camera).id!!
     }
 
     @Transactional
     fun getCamera(id: Long): CameraResponseDto? {
-        // TODO: null 일 때 error 처리
-        return cameraRepository.findByIdOrNull(id)?.let { CameraResponseDto(it) }
+        return cameraRepository.findByIdOrNull(id)?.let { CameraResponseDto(it) } ?: throw BaseException(BaseResponseCode.NOT_FOUND)
     }
 
     @Transactional
     fun getAllCamera(): MutableList<SimpleCameraResponseDto> {
-        val list: MutableList<SimpleCameraResponseDto> = mutableListOf<SimpleCameraResponseDto>()
+        val list: MutableList<SimpleCameraResponseDto> = mutableListOf()
         cameraRepository.findAll().forEach {
             camera -> list.add(SimpleCameraResponseDto(camera))
         }
@@ -70,8 +68,8 @@ class CameraService(
 
     @Transactional
     fun updateImage(id: Long, request: ImageRequestDto) {
-        val camera = cameraRepository.findByIdOrNull(id)
-        camera?.updateImage(request.image)
+        val camera = cameraRepository.findByIdOrNull(id) ?: throw BaseException(BaseResponseCode.NOT_FOUND)
+        camera.updateImage(request.image)
 
         val restTemplate = RestTemplate()
         val httpHeaders = org.springframework.http.HttpHeaders()
@@ -98,22 +96,21 @@ class CameraService(
 
     @Transactional
     fun updateTables(id: Long, request: TablesRequestDto) {
-        // TODO: null 일 때 error 처리
-        val camera = cameraRepository.findByIdOrNull(id)
-        camera?.updateTables(request.tables)
+        val camera = cameraRepository.findByIdOrNull(id) ?: throw BaseException(BaseResponseCode.NOT_FOUND)
+        camera.updateTables(request.tables)
+        camera.updateClients(emptyList())
     }
 
     @Transactional
     fun updateClients(id: Long, request: ClientsRequestDto) {
-        // TODO: null 일 때 error 처리
-        val camera = cameraRepository.findByIdOrNull(id)
-        val tables = camera?.tables
+        val camera = cameraRepository.findByIdOrNull(id) ?: throw BaseException(BaseResponseCode.NOT_FOUND)
+        val tables = camera.tables
         val clients = request.clients
         for (client in clients) {
             var distance = Double.MAX_VALUE
             var num: Int = -1
             var k: Double
-            for ((n, table) in tables!!.withIndex()) {
+            for ((n, table) in tables.withIndex()) {
                 k = ((client.cltX1 + client.cltX2 / 2) - (table.tabX1 + table.tabX2 / 2)).toDouble().pow(2) +
                         ((client.cltY1 + client.cltY2 / 2) - (table.tabY1 + table.tabY2 / 2)).toDouble().pow(2)
                 if (k < distance) {
@@ -123,7 +120,7 @@ class CameraService(
             }
             client.sitTable = num
         }
-        camera?.updateClients(clients)
+        camera.updateClients(clients)
     }
 
 }

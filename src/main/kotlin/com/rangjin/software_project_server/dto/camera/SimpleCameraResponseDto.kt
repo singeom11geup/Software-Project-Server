@@ -5,11 +5,13 @@ import com.rangjin.software_project_server.domain.Camera
 data class SimpleCameraResponseDto(
     val id: Long?,
     val name: String,
+    val image: String,
 ) {
 
     constructor(camera: Camera): this(
         camera.id,
         camera.name,
+        camera.image,
     )
 
 }
