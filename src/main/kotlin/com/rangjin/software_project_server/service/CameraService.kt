@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
+import java.lang.Integer.max
+import java.lang.Math.min
 import kotlin.math.pow
 
 
@@ -107,20 +109,45 @@ class CameraService(
         val tables = camera.tables
         val clients = request.clients
         for (client in clients) {
-            var distance = Double.MAX_VALUE
+            var area = -1
             var num: Int = -1
-            var k: Double
+            var k: Int
             for ((n, table) in tables.withIndex()) {
-                k = ((client.cltX1 + client.cltX2 / 2) - (table.tabX1 + table.tabX2 / 2)).toDouble().pow(2) +
-                        ((client.cltY1 + client.cltY2 / 2) - (table.tabY1 + table.tabY2 / 2)).toDouble().pow(2)
-                if (k < distance) {
-                    distance = k
+//                k = ((client.cltX1 + client.cltX2 / 2) - (table.tabX1 + table.tabX2 / 2)).toDouble().pow(2) +
+//                        ((client.cltY1 + client.cltY2 / 2) - (table.tabY1 + table.tabY2 / 2)).toDouble().pow(2)
+                k = intersectArea(client, table)
+                if (k > area) {
+                    area = k
                     num = n
                 }
             }
             client.sitTable = num
         }
         camera.updateClients(clients)
+    }
+
+    fun intersectArea(client: Camera.Client, table: Camera.Table): Int {
+        // case1 오른쪽으로 벗어나 있는 경우
+        if (client.cltX2 < table.tabX1) return 0
+
+        // case2 왼쪽으로 벗어나 있는 경우
+        if (client.cltX1 > table.tabX2) return 0
+
+        // case3 위쪽으로 벗어나 있는 경우
+        if (client.cltY2 < table.tabY1) return 0
+
+        // case4 아래쪽으로 벗어나 있는 경우
+        if (client.cltY1 > table.tabY2) return 0
+
+        val leftUpX = max(client.cltX1, table.tabX1)
+        val leftUpY = max(client.cltY1, table.tabY1)
+        val rightDownX = min(client.cltX2, table.tabX2)
+        val rightDownY = min(client.cltY2, table.tabY2)
+
+        val width = rightDownX - leftUpX
+        val height =  rightDownY - leftUpY
+
+        return width * height
     }
 
 }
